@@ -12,17 +12,16 @@ fi
 PORT=${PORT:-8000}
 WORKERS=${WORKERS:-4}
 
-# Add packages to Python path
-cd dist
-
-# Install dependencies if they're not already installed
-python -m pip install -r requirements.txt
-
 echo "Starting server in $ENVIRONMENT mode..."
+
+# Change to dist directory and ensure dependencies are installed
+cd dist || exit 1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt --no-cache-dir
 
 if [ "$ENVIRONMENT" = "production" ]; then
     # Production mode with Gunicorn
-    gunicorn app.main:app \
+    python -m gunicorn app.main:app \
         --workers $WORKERS \
         --worker-class uvicorn.workers.UvicornWorker \
         --bind 0.0.0.0:$PORT \
