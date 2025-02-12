@@ -12,7 +12,7 @@ class Environment(str, Enum):
 
 
 class Settings(BaseSettings):
-    # Environment
+    # Environment settings
     environment: Environment = Environment.DEVELOPMENT
     DEBUG: bool = True
 
@@ -28,22 +28,22 @@ class Settings(BaseSettings):
     POSTGRES_DB: str
 
     # Database Pool Settings
-    DB_POOL_SIZE: int = 5
-    DB_MAX_OVERFLOW: int = 10
-    DB_POOL_TIMEOUT: int = 30
-    DB_POOL_RECYCLE: int = 1800  # 30 minutes
-    DB_ECHO_LOG: bool = True
+    DB_POOL_SIZE: int = 20
+    DB_MAX_OVERFLOW: int = 30
+    DB_POOL_TIMEOUT: int = 60
+    DB_POOL_RECYCLE: int = 3600
+    DB_ECHO_LOG: bool = False
 
     # Migration Settings
     MIGRATIONS_DIR: str = "migrations"
     ALEMBIC_CONFIG: str = "alembic.ini"
 
-    # OpenAI Settings
+    # OpenAI
     OPENAI_API_KEY: str
     OPENAI_MODEL: str = "gpt-3.5-turbo"
     GPT_API_URL: str = "https://api.openai.com/v1/chat/completions"
-    ORGANIZATION_ID: str
-    PROJECT_ID: str
+    ORGANIZATION_ID: str | None = None
+    PROJECT_ID: str | None = None
 
     @property
     def DATABASE_URL(self) -> str:
