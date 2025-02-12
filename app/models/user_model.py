@@ -28,7 +28,7 @@ class User(UUIDBase):
     sessions: Mapped[List["Session"]] = relationship(
         Session,
         back_populates="user",
-        cascade="save-update, merge, refresh-expire, expunge, delete-orphan",
+        cascade="all, delete-orphan",
         collection_class=list,
         lazy="select",
     )

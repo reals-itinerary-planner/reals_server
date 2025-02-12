@@ -1,11 +1,19 @@
 from typing import Optional
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+from enum import Enum
+import os
+
+
+class Environment(str, Enum):
+    DEVELOPMENT = "development"
+    TEST = "test"
+    PRODUCTION = "production"
 
 
 class Settings(BaseSettings):
     # Environment
-    ENVIRONMENT: str
+    environment: Environment = Environment.DEVELOPMENT
     DEBUG: bool = True
 
     # Application
@@ -13,11 +21,11 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
 
     # Database
-    POSTGRES_USER: str = "postgres"
-    POSTGRES_PASSWORD: str = "postgres"
-    POSTGRES_HOST: str = "localhost"
-    POSTGRES_PORT: str = "5432"
-    POSTGRES_DB: str = "reals"
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_HOST: str
+    POSTGRES_PORT: str
+    POSTGRES_DB: str
 
     # Database Pool Settings
     DB_POOL_SIZE: int = 5
@@ -32,7 +40,7 @@ class Settings(BaseSettings):
 
     # OpenAI Settings
     OPENAI_API_KEY: str
-    OPENAI_MODEL: str
+    OPENAI_MODEL: str = "gpt-3.5-turbo"
     GPT_API_URL: str = "https://api.openai.com/v1/chat/completions"
     ORGANIZATION_ID: str
     PROJECT_ID: str
@@ -55,7 +63,25 @@ class Settings(BaseSettings):
 
     class Config:
         env_file = ".env"
-        case_sensitive = True
+        use_enum_values = True
+
+        @classmethod
+        def customise_sources(
+            cls,
+            init_settings,
+            env_settings,
+            file_secret_settings,
+        ):
+            env = os.getenv("ENVIRONMENT", "development")
+            env_file = f".env.{env}"
+            if os.path.exists(env_file):
+                cls.env_file = env_file
+
+            return (
+                init_settings,
+                env_settings,
+                file_secret_settings,
+            )
 
 
 @lru_cache()
