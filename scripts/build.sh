@@ -25,10 +25,10 @@ else
 fi
 
 # Install production dependencies
-if [ "$ENV" = "production" ]; then
+# if [ "$ENV" = "production" ]; then
     pip install -r requirements.txt --target dist/packages
-else
-    pip install -r requirements-dev.txt --target dist/packages
-fi
+# else
+#     pip install -r requirements-dev.txt --target dist/packages
+# fi
 
 echo "Build completed in ./dist for $ENV environment" 
