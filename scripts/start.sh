@@ -9,7 +9,7 @@ if [ -f ".env.$ENV" ]; then
     source ".env.$ENV"
 fi
 
-PORT=${PORT:-8000}
+PORT=8000
 WORKERS=${WORKERS:-4}
 
 echo "Starting server in $ENV mode... PORT: $PORT, WORKERS: $WORKERS"
