@@ -26,7 +26,7 @@ fi
 
 # Install production dependencies
 # if [ "$ENV" = "production" ]; then
-    pip install -r requirements.txt --target dist/packages
+    pip install -r requirements.txt
 # else
 #     pip install -r requirements-dev.txt --target dist/packages
 # fi
