@@ -6,6 +6,8 @@ from sqlalchemy.pool import AsyncAdaptedQueuePool
 from sqlalchemy import event, text
 from app.models import BaseModel
 from app.core.config import settings
+from app.schemas.response_schema import ResponseSchema
+from logging import Logger
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -40,12 +42,17 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
     session = AsyncSessionLocal()
     try:
         yield session
+        await session.commit()  # Commit if no exceptions
     except Exception as e:
-        logger.error(f"Session error: {str(e)}")
+        logger.error(f"Session error: {e.__class__.__name__}: {str(e)}")
         await session.rollback()
+        # Don't wrap the error in ResponseSchema here
         raise
     finally:
-        await session.close()
+        try:
+            await session.close()
+        except Exception as e:
+            logger.error(f"Error closing session: {e.__class__.__name__}: {str(e)}")
 
 
 async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
@@ -96,3 +103,6 @@ def receive_checkout(dbapi_connection, connection_record, connection_proxy):
 @event.listens_for(async_engine.sync_engine, "checkin")
 def receive_checkin(dbapi_connection, connection_record):
     logger.info("Database connection returned to pool")
+
+
+async_session_maker = AsyncSessionLocal

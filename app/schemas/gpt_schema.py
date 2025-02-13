@@ -60,8 +60,8 @@ class CompletionUsage(BaseSchema):
     completion_tokens: int
     prompt_tokens: int
     total_tokens: int
-    prompt_tokens_details: Dict[str, int]
-    completion_tokens_details: Dict[str, int]
+    prompt_tokens_details: Dict[str, Any]
+    completion_tokens_details: Dict[str, Any]
 
 
 class OpenAIRequest(BaseSchema):

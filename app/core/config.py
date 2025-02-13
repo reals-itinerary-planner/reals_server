@@ -27,6 +27,11 @@ class Settings(BaseSettings):
     POSTGRES_PORT: str
     POSTGRES_DB: str
 
+    # JWT
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str
+    JWT_EXPIRE_DAYS: int
+
     # Database Pool Settings
     DB_POOL_SIZE: int = 20
     DB_MAX_OVERFLOW: int = 30

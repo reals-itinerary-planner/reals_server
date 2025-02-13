@@ -1,5 +1,6 @@
+from datetime import datetime
 from typing import TYPE_CHECKING, Optional, List
-from sqlalchemy import JSON, String, Text, ForeignKey
+from sqlalchemy import JSON, DateTime, String, Text, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import UUID
 from app.models.base_model import BaseModel, UUIDBase
@@ -32,6 +33,11 @@ class User(UUIDBase):
         collection_class=list,
         lazy="select",
     )
+    login_sessions: Mapped[Optional["LoginSession"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="select",
+    )
 
     def __init__(self, **kwargs):
         super().__init__()
@@ -52,3 +58,14 @@ class UserProfile(BaseModel):
 
     # Relationship
     user: Mapped["User"] = relationship(back_populates="profile")
+
+
+class LoginSession(BaseModel):
+    __tablename__ = "login_sessions"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.uuid"), nullable=False, unique=True
+    )
+    token: Mapped[str] = mapped_column(String(255), nullable=False)
+    expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    user: Mapped["User"] = relationship(back_populates="login_sessions")

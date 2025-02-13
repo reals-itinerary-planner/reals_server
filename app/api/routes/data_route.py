@@ -3,6 +3,7 @@ from fastapi import APIRouter, Query, Depends
 from app.controllers.data_controller import DataController
 from app.schemas.base_schema import BaseSchema
 from app.schemas.query_schema import QueryParams
+from app.schemas.response_schema import ResponseSchema
 
 T = TypeVar("T", bound=BaseSchema)
 
@@ -26,7 +27,9 @@ class DataRoute(Generic[T]):
 
         @self.router.get("/")
         async def get_all(query: QueryParams = Depends(QueryParams)):
-            return await self.controller.get_all(query)
+            # return await self.controller.get_all(query)
+            return None
+            # return ResponseSchema.success(result=await self.controller.get_all(query))
 
         @self.router.post("/")
         async def create(data: T):

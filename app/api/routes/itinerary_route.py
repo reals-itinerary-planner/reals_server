@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, Request
 
 from app.controllers.itinerary_controller import ItineraryController
 from app.schemas.itinerary_schema import ItineraryRequest
@@ -16,8 +16,9 @@ async def get_itinerary_controller(db: AsyncSession = Depends(get_async_db)):
 
 @router.post("/generate-itinerary")
 async def generate_itinerary(
+    request: Request,
     itinerary_request: ItineraryRequest,
-    user_id: str = Header(..., alias="User-Id", description="User ID"),
+    # user_id: str = Header(..., alias="User-Id", description="User ID"),
     session_id: Optional[str] = Header(
         None, alias="Session-Id", description="Session ID"
     ),
@@ -26,6 +27,7 @@ async def generate_itinerary(
     # controller: ItineraryController = Depends(get_itinerary_controller),
 ):
     try:
+        user_id = request.state.user["sub"]
         controller = ItineraryController(db)
         return await controller.create_itinerary(
             db=db,

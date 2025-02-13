@@ -9,6 +9,7 @@ from app.core.database import get_async_db
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.gpt_schema import OpenAIRequest
+from app.schemas.response_schema import ResponseSchema
 
 # from app.repository.gpt_repository import GPTRepository
 
@@ -46,7 +47,9 @@ class ItineraryController:
                     ),
                     db,
                 )
-            return itineraryResponse
+            return ResponseSchema.success(
+                result=itineraryResponse, message="Itinerary created successfully"
+            )
         except HTTPException:
             raise
         except Exception as e:

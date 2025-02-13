@@ -91,14 +91,17 @@ class GPTService:
             "role": "system",
             "content": (
                 "You are an expert dating itinerary planner in Hong Kong. Here is the provided first prompt format:  "
-                '{"location": "string", "date": "YYYY-MM-DD","budget": float,"preferences": "string","transportation": "string"}'
+                '{"location": "string", "date": "YYYY-MM-DD","time": "HH:MM-HH:MM","budget": float,"preferences": "string",'
+                '"transportation": "string","haveCuisine": boolean,"cuisineTypes": "string","tripIntensity": percentage(0-100)}'
                 "There may be additional changes in the prompt, change the result accordingly."
                 "If the user additional prompt isn't related to the itinerary, just return normal text, otherwise, follow the format below."
+                "Try to follow the user's preferences,budget.The activities is expected to be enterable by user."
+                "Provide itinerary that saves as much travelling time as possible."
                 "Response in JSON format:"
                 '{"date": "YYYY-MM-DD", '
                 '"weather": {"description": "string", "temperature": "string", "conditions": "string"}, '
                 '"activities": [{"name": "string", "description": "string", "price": "string", '
-                '"place": "string", "transit": {"from": "string", "method": "string", '
+                '"place": "string", "transit": {"from": "string","to": "string", "method": "string", '
                 '"estimated_time": "string", "price": "string"}}], '
                 '"budget": {"total_activity_cost": "string", "total_transit_cost": "string", '
                 '"grand_total": "string"}}. '
@@ -482,19 +485,18 @@ class GPTService:
             await self.check_gpt_avalibility()
             session = await self.handle_gpt_user_session(request, db)
             print("session xd", session.to_dict())
-            legacy_response = (
-                await asyncClient.chat.completions.with_raw_response.create(
-                    model="gpt-4o-mini",
-                    messages=[
-                        self.system_messages,
-                        *[
-                            {"role": message.role, "content": message.content}
-                            for message in session.messages
-                        ],
-                        {"role": "user", "content": request.content},
+            legacy_response = await asyncClient.chat.completions.with_raw_response.create(
+                model="gpt-4o-mini",
+                messages=[
+                    self.system_messages,
+                    *[
+                        {"role": message.role, "content": message.content}
+                        for message in session.messages
                     ],
-                    max_tokens=500,
-                )
+                    # {"role": "user", "content": request.content},
+                ],
+                max_tokens=500,
+                store=True,
             )
             # legacy_response = (
             #     await asyncClient.chat.completions.with_raw_response.create(
@@ -533,8 +535,8 @@ class GPTService:
                     "completion_tokens": chat_completetion_response.usage.completion_tokens,
                     "prompt_tokens": chat_completetion_response.usage.prompt_tokens,
                     "total_tokens": chat_completetion_response.usage.total_tokens,
-                    "prompt_tokens_details": chat_completetion_response.usage.prompt_tokens_details,
-                    "completion_tokens_details": chat_completetion_response.usage.completion_tokens_details,
+                    "prompt_tokens_details": chat_completetion_response.usage.prompt_tokens_details.dict(),
+                    "completion_tokens_details": chat_completetion_response.usage.completion_tokens_details.dict(),
                 },
             }
 
