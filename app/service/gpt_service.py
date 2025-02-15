@@ -273,6 +273,7 @@ class GPTService:
         try:
             # Create API request log if we have response and headers
             print("post_process", response, headers, session)
+            is_valid_response = False
             request_log = await self.api_request_log_repository.create(
                 APIRequestLog(
                     session_uuid=request.session_id or session.uuid,
@@ -332,6 +333,7 @@ class GPTService:
                 print("current_session 2")
                 # Add assistant message if we have a valid response
                 if response and response.choices and len(response.choices) > 0:
+                    is_valid_response = True
                     current_session.messages.append(
                         Message(
                             session_uuid=session.uuid,
@@ -364,6 +366,7 @@ class GPTService:
                         "messages": current_session.messages,
                         "request_logs": current_session.request_logs,
                         "api_usage": current_session.api_usage,
+                        "is_valid_response": is_valid_response,
                     },
                 )
                 print("current_session 5")

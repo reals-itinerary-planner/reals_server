@@ -41,7 +41,7 @@ class ResponseSchema(BaseModel, Generic[T]):
     """Standard response schema"""
 
     result: Optional[T] = None
-    status_code: int = 200
+    status: int = 200
     message: str = "Success"
 
     class Config:
@@ -57,9 +57,9 @@ class ResponseSchema(BaseModel, Generic[T]):
     @classmethod
     def success(cls, result: Any = None, message: str = "Success") -> "ResponseSchema":
         """Create a success response"""
-        return cls(result=result, status_code=200, message=message)
+        return cls(result=result, status=200, message=message)
 
     @classmethod
-    def error(cls, status_code: int = 400, message: str = "Error") -> "ResponseSchema":
+    def error(cls, status: int = 400, message: str = "Error") -> "ResponseSchema":
         """Create an error response"""
-        return cls(result=None, status_code=status_code, message=message)
+        return cls(result=None, status=status, message=message)

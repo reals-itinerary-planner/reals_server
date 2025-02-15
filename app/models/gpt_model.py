@@ -50,6 +50,8 @@ class Session(UUIDBase):
     user_id: Mapped[uuidLib.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.uuid", ondelete="CASCADE"), nullable=False
     )
+    is_active: Mapped[bool] = mapped_column(default=True, nullable=True)
+    is_valid_response: Mapped[bool] = mapped_column(default=False, nullable=True)
     # title: Mapped[Optional[str]] = mapped_column(String(255))
     # description: Mapped[Optional[str]] = mapped_column(Text)
     # settings: Mapped[Optional[dict]] = mapped_column(JSON)

@@ -355,12 +355,32 @@ class BaseRepository(Generic[T]):
                 status_code=500, detail=f"Error applying select: {str(e)}"
             )
 
-    def _apply_grouping(
-        self, query: Query, group_by: Optional[List[str]] = None
-    ) -> Query:
-        """Apply grouping and aggregations to the query."""
+    def _apply_grouping(self, query: Any, group_by: List[str]) -> Any:
+        """Apply GROUP BY to query"""
         if group_by:
-            query = query.group_by(*[getattr(self.model, field) for field in group_by])
+            # Get all selectable columns from the model
+            all_columns = [column for column in self.model.__table__.columns]
+
+            # Create list of columns to group by
+            group_columns = []
+
+            # Add specified group by columns
+            for field in group_by:
+                try:
+                    group_columns.append(getattr(self.model, field))
+                except AttributeError:
+                    logger.warning(f"Column {field} not found in {self.model.__name__}")
+                    continue
+
+            # Add primary key columns if not already included
+            for column in all_columns:
+                if column.primary_key and column not in group_columns:
+                    group_columns.append(column)
+
+            # Apply GROUP BY if we have columns to group by
+            if group_columns:
+                query = query.group_by(*group_columns)
+
         return query
 
     async def create(self, data: Dict) -> T:
@@ -538,7 +558,7 @@ class BaseRepository(Generic[T]):
         model=None,
         path=None,
     ) -> Tuple[Select, List]:
-        print(f"Raw condition input: {condition}")
+        print(f"Raw condition input: {condition} {model} {path}")
         print(f"Condition type: {type(condition)}")
 
         # Convert to FilterCondition if needed
@@ -561,9 +581,9 @@ class BaseRepository(Generic[T]):
         if condition.field and condition.op:
             try:
                 column = getattr(model, condition.field)
-                filter_expr = self._apply_operator(
-                    column, condition.op, condition.value
-                )
+                # Cast the value before applying the operator
+                casted_value = self._cast_value(column, condition.value)
+                filter_expr = self._apply_operator(column, condition.op, casted_value)
                 if filter_expr is not None:
                     current_filters.append(filter_expr)
                     print(f"Added direct filter: {filter_expr}")
@@ -604,7 +624,9 @@ class BaseRepository(Generic[T]):
                     logger.error(f"Error processing relation {rel_name}: {str(e)}")
                     logger.error(f"Full error: {e.__class__.__name__}: {str(e)}")
                     raise
-
+        if condition.and_:
+            for and_condition in condition.and_:
+                stmt, _ = self._apply_filter_condition(stmt, and_condition, model, path)
         if current_filters:
             filter_condition = and_(*current_filters)
             stmt = stmt.where(filter_condition)
@@ -743,3 +765,33 @@ class BaseRepository(Generic[T]):
             await self.db.rollback()
             logger.error(f"Error deleting record: {str(e)}")
             raise
+
+    def _cast_value(self, column, value):
+        """Cast value to the correct primitive type based on column type"""
+        if value is None:
+            return None
+
+        try:
+            python_type = column.type.python_type
+
+            # Handle string input
+            if isinstance(value, str):
+                if python_type == bool:
+                    return value.lower() == "true"
+                elif python_type == int:
+                    return int(float(value))
+                elif python_type == float:
+                    return float(value)
+                elif python_type == str:
+                    return value
+
+            # Value is already correct type
+            elif isinstance(value, python_type):
+                return value
+
+            # Try direct conversion
+            return python_type(value)
+
+        except Exception as e:
+            logger.error(f"Type casting error: {str(e)} for value: {value}")
+            return value  # Return original value if casting fails

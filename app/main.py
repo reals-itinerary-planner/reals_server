@@ -50,7 +50,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
     return JSONResponse(
         status_code=exc.status_code,
         content=ResponseSchema.error(
-            status_code=exc.status_code, message=str(exc.detail)
+            status=exc.status_code, message=str(exc.detail)
         ).dict(),
     )
 
@@ -59,7 +59,7 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 async def general_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
         status_code=500,
-        content=ResponseSchema.error(status_code=500, message=str(exc)).dict(),
+        content=ResponseSchema.error(status=500, message=str(exc)).dict(),
     )
 
 

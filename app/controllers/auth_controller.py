@@ -17,7 +17,7 @@ class AuthController:
         if not user:
             raise HTTPException(status_code=401, detail="Invalid credentials")
         token = await self.auth_service.create_token(user)
-        return {"jwt": token, "token_type": "Bearer"}
+        return {"jwt": token, "user": user}
 
     async def refresh_token(self, token: str):
         new_token = await self.auth_service.verify_token(token)

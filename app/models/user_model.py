@@ -69,3 +69,11 @@ class LoginSession(BaseModel):
     token: Mapped[str] = mapped_column(String(255), nullable=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     user: Mapped["User"] = relationship(back_populates="login_sessions")
+
+
+# class UserItinerary(BaseModel):
+#     __tablename__ = "user_itineraries"
+
+#     user_id: Mapped[uuid.UUID] = mapped_column(
+#         UUID(as_uuid=True), ForeignKey("users.uuid"), nullable=False, unique=True
+#     )

@@ -12,8 +12,11 @@ async def login(
     email: str = Body(..., description="Email"),
     password: str = Body(..., description="Password"),
     db: AsyncSession = Depends(get_async_db),
-) -> ResponseSchema[any]:
+):
 
     controller = AuthController(db)
     result = await controller.login(email, password)
-    return ResponseSchema.success(result=result, message="Login successful")
+    print("result is", result)
+    return result
+    # return ResponseSchema.success(result=result, message="Login successful")
+    # return {"TEST": result["jwt"], "token_type": "Bearer"}

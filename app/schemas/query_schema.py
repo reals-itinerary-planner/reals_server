@@ -25,26 +25,50 @@ class FilterCondition(BaseModel):
             return cls()
 
         root = cls()
+        filter_groups = {}  # Group filters by their parent path
+
         for key, value in data.items():
             if key.startswith("filter_by["):
-                # Remove prefix and split by '][' to handle nested paths
                 clean_key = key.replace("filter_by[", "").replace("]", "")
                 parts = clean_key.split("[")
 
-                current = root
-                # Process all parts except the last two (field and operator)
-                for part in parts[:-2]:
-                    if not current.relation:
-                        current.relation = {}
-                    if part not in current.relation:
-                        current.relation[part] = cls()
-                    current = current.relation[part]
+                # Get the parent path (everything except field and operator)
+                parent_path = tuple(parts[:-2])
 
-                if len(parts) >= 2:
-                    current.field = parts[-2]
-                    current.op = parts[-1]
-                    current.value = value
+                if parent_path not in filter_groups:
+                    filter_groups[parent_path] = []
+                filter_groups[parent_path].append((parts[-2], parts[-1], value))
 
+        # Process grouped filters
+        for parent_path, filters in filter_groups.items():
+            current = root
+            print("current", current, filters, parent_path)
+            # Create the path to the parent
+            for part in parent_path:
+                if not current.relation:
+                    current.relation = {}
+                if part not in current.relation:
+                    current.relation[part] = cls()
+                current = current.relation[part]
+
+            # Set the last filter in the group
+            if filters:
+                field, op, value = filters[0]
+                current.field = field
+                current.op = op
+                current.value = value
+
+                # Add additional filters as AND conditions
+                for field, op, value in filters[1:]:
+                    if not current.and_:
+                        current.and_ = []
+                    new_condition = cls()
+                    new_condition.field = field
+                    new_condition.op = op
+                    new_condition.value = value
+                    current.and_.append(new_condition)
+
+        print("root", root)
         return root
 
     @classmethod

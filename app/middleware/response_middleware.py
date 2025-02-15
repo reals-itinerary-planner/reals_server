@@ -24,16 +24,16 @@ class ResponseMiddleware(BaseHTTPMiddleware):
             try:
                 # Parse the content as JSON
                 json_content = json.loads(content)
-                print("json_content is 1", json_content, content, type(content))
+                # print("json_content is 1", json_content, content, type(content))
                 # If not already in our standard format
                 if not all(
                     key in json_content for key in ["result", "status_code", "message"]
                 ):
-                    print("json_content is", json_content, content, type(content))
+                    # print("json_content is", json_content, content, type(content))
                     # Create standardized response
                     standardized_response = ResponseSchema(
                         result=serialize_object(json_content),
-                        status_code=response.status_code,
+                        status=response.status_code,
                         message="Success" if response.status_code < 400 else "Error",
                     ).dict()
 
