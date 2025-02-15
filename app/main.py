@@ -14,7 +14,7 @@ import uvicorn
 
 from app.core.database import init_db
 from app.middleware.rate_limiter import rate_limit_middleware
-from dist.packages.starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.cors import CORSMiddleware
 from app.middleware import auth_middleware
 from .schemas.response_schema import ResponseSchema
 

@@ -6,7 +6,6 @@ from typing import Optional
 from jose import jwt
 from app.models.user_model import User
 from app.repositories.base_repository import BaseRepository
-from dist.packages.starlette.responses import JSONResponse
 from ..core.config import settings
 from app.core.database import async_session_maker
 

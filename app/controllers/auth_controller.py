@@ -3,7 +3,7 @@ from fastapi import Depends
 from app.core.database import get_async_db
 from app.repositories.base_repository import BaseRepository
 from app.service.auth_service import AuthService
-from dist.packages.sqlalchemy.ext.asyncio.session import AsyncSession
+from sqlalchemy.ext.asyncio.session import AsyncSession
 
 
 class AuthController:

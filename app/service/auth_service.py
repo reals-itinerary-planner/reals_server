@@ -4,9 +4,8 @@ from typing import Optional
 from app.models.user_model import User
 from app.core.security import verify_password
 from app.repositories.base_repository import BaseRepository
-from dist.packages.sqlalchemy.ext.asyncio.session import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
-from dist.packages.sqlalchemy.orm.strategy_options import joinedload
 
 
 class AuthService:
