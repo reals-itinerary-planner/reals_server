@@ -19,6 +19,10 @@ class AuthController:
         token = await self.auth_service.create_token(user)
         return {"jwt": token, "user": user}
 
+    async def register(self, email: str, password: str, username: str):
+        user = await self.auth_service.create_user(email, password, username)
+        return {"user": user}
+
     async def refresh_token(self, token: str):
         new_token = await self.auth_service.verify_token(token)
         if not new_token:

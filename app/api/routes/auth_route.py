@@ -20,3 +20,15 @@ async def login(
     return result
     # return ResponseSchema.success(result=result, message="Login successful")
     # return {"TEST": result["jwt"], "token_type": "Bearer"}
+
+
+@router.post("/register")
+async def register(
+    email: str = Body(..., description="Email"),
+    password: str = Body(..., description="Password"),
+    username: str = Body(..., description="Username"),
+    db: AsyncSession = Depends(get_async_db),
+):
+    controller = AuthController(db)
+    result = await controller.register(email, password, username)
+    return result

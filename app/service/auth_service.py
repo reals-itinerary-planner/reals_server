@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from jose import jwt
 from typing import Optional
 from app.models.user_model import User
-from app.core.security import verify_password
+from app.core.security import get_password_hash, verify_password
 from app.repositories.base_repository import BaseRepository
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
@@ -33,6 +33,14 @@ class AuthService:
         if not user or not verify_password(password, user.hashed_password):
             return None
         return user
+
+    async def create_user(self, email: str, password: str, username: str) -> User:
+        user = User(
+            email=email,
+            hashed_password=get_password_hash(password),
+            username=username,
+        )
+        return await self.user_repo.create(user.to_dict())
 
     async def create_token(self, user: User) -> str:
         expires_at = datetime.now() + timedelta(days=self.token_expire_days)
