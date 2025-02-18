@@ -147,7 +147,7 @@ class GPTService:
     #         "}"
     #     ),
     # }
-    def trim_json_string(json_string):
+    def trim_json_string(self, json_string):
         stack = []
         start, end = 0, len(json_string)
 
@@ -520,7 +520,7 @@ class GPTService:
                     ],
                     # {"role": "user", "content": request.content},
                 ],
-                max_tokens=500,
+                max_tokens=1000,
                 store=True,
             )
             # legacy_response = (
