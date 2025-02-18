@@ -100,7 +100,7 @@ class GPTService:
                 "Response in JSON format:"
                 '{"date": "YYYY-MM-DD", '
                 '"weather": {"description": "string", "temperature": "string", "conditions": "string"}, '
-                '"activities": [{"name": "string", "description": "string", "price": "string", '
+                '"activities": [{"name": "string", "description": "string", "price": "string", "from": "HH:mm", "to": "HH:mm",'
                 '"place": "string", "transit": {"from": "string","to": "string", "method": "string", '
                 '"estimated_time": "string", "price": "string"}}], '
                 '"budget": {"total_activity_cost": "string", "total_transit_cost": "string", '
@@ -147,6 +147,24 @@ class GPTService:
     #         "}"
     #     ),
     # }
+    def trim_json_string(json_string):
+        stack = []
+        start, end = 0, len(json_string)
+
+        # Find the first '{' and match its closing '}'
+        for i, char in enumerate(json_string):
+            if char == "{":
+                if not stack:
+                    start = i  # First opening bracket
+                stack.append(i)
+            elif char == "}":
+                stack.pop()
+                if not stack:
+                    end = i + 1  # Last closing bracket
+                    break
+
+        return json_string[start:end]
+
     async def check_gpt_avalibility(self):
         """Pre-check for API availability"""
         try:
@@ -338,7 +356,11 @@ class GPTService:
                         Message(
                             session_uuid=session.uuid,
                             role=response.choices[0].message.role,
-                            content=response.choices[0].message.content,
+                            content=(
+                                self.trim_json_string(
+                                    response.choices[0].message.content
+                                )
+                            ),
                         )
                     )
 
