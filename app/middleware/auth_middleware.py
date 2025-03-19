@@ -50,7 +50,6 @@ async def verify_token(
         if user.login_sessions.token != token:
             raise HTTPException(status_code=401, detail="Token has been revoked")
 
-        print("payload is", payload)
         return payload
 
     except jwt.ExpiredSignatureError:
@@ -80,10 +79,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 try:
                     credentials = await security(request)
                 except HTTPException:
-                    # return JSONResponse(
-                    #     status_code=401,
-                    #     content={"detail": "Missing or invalid authentication token"},
-                    # )
+
                     raise HTTPException(
                         status_code=401,
                         detail="Missing or invalid authentication token",
@@ -92,28 +88,20 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 try:
                     # Verify token
                     payload = await verify_token(credentials, session)
-                    print("payload is", payload)
+
                     # Add user data to request state
                     request.state.user = payload
-                    print("request.state.user is", request.state.user)
                     # Continue processing the request
                     response = await call_next(request)
-                    print("response is", response)
                     return response
 
                 except HTTPException as e:
                     print("HTTPException: ", e)
-                    # return JSONResponse(
-                    #     status_code=401, content={"detail": str(e.detail)}
-                    # )
                     raise HTTPException(status_code=401, detail=str(e.detail))
 
             except Exception as e:
                 print("Authentication failed: ", e)
-                # return JSONResponse(
-                #     status_code=401, content={"detail": "Authentication failed"}
-                # )
                 raise HTTPException(status_code=401, detail="Authentication failed")
             finally:
-                # Close the database session
+
                 await session.close()

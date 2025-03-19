@@ -17,17 +17,9 @@ class AuthService:
         self.user_repo = BaseRepository(User, db)
 
     async def authenticate_user(self, email: str, password: str) -> Optional[User]:
-        user = (
-            await (
-                self.user_repo.get_first(
-                    filters={"filter_by[email][equals]": email},
-                    include=["login_sessions"],
-                )
-                # self.db.query(User)
-                # .filter(User.email == email)
-                # .first()
-                # .options(joinedload(User.login_sessions))
-            )
+        user = await self.user_repo.get_first(
+            filters={"filter_by[email][equals]": email},
+            include=["login_sessions"],
         )
         print("user he", user.hashed_password)
         if not user or not verify_password(password, user.hashed_password):

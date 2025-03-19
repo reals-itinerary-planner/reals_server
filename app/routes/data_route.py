@@ -22,7 +22,6 @@ def create_data_router(
     # controller: Optional[Type[DataController]] = None,
 ) -> APIRouter:
     router = APIRouter(prefix=prefix, tags=tags)
-    # controller = controller or DataController(model)
 
     def get_controller(db: AsyncSession = Depends(get_async_db)) -> DataController:
         return DataController(model, db)

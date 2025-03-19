@@ -11,8 +11,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.gpt_schema import OpenAIRequest
 from app.schemas.response_schema import ResponseSchema
 
-# from app.repository.gpt_repository import GPTRepository
-
 
 class ItineraryController:
     def __init__(self, db: AsyncSession):
@@ -27,9 +25,6 @@ class ItineraryController:
         is_streamed: bool = False,
     ) -> ItineraryResponse:
         try:
-            # First verify session exists
-
-            # Continue with itinerary creation
             if is_streamed:
                 itineraryResponse = await self.gpt_service.streamed_request(
                     OpenAIRequest(

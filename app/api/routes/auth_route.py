@@ -16,10 +16,7 @@ async def login(
 
     controller = AuthController(db)
     result = await controller.login(email, password)
-    print("result is", result)
     return result
-    # return ResponseSchema.success(result=result, message="Login successful")
-    # return {"TEST": result["jwt"], "token_type": "Bearer"}
 
 
 @router.post("/register")

@@ -185,16 +185,3 @@ class GPTRepository:
         except Exception as e:
             logger.error(f"Error creating {model.__name__}: {e}")
             raise
-
-
-# class SessionRepository(BaseRepository[Session]):
-#     async def get_by_filters(self, **filters: Unpack[SessionFilter]) -> List[Session]:
-#         return await super().get_by_filters(**filters)
-
-#     async def get_first(self, **filters: Unpack[SessionFilter]) -> Optional[Session]:
-#         return await super().get_first(**filters)
-
-#     async def get_all(
-#         self, skip: int = 0, limit: int = 100, **filters: Unpack[SessionFilter]
-#     ) -> List[Session]:
-#         return await super().get_all(skip, limit, **filters)

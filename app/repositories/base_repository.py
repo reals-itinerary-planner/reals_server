@@ -114,7 +114,7 @@ class BaseRepository(Generic[T]):
                 column_attr = getattr(self.model, field_name, None)
                 if not column_attr:
                     continue
-                print("test apply", column_attr, operator, value)
+
                 filter_conditions.append(
                     self._apply_operator(column_attr, operator, value)
                 )
@@ -125,7 +125,6 @@ class BaseRepository(Generic[T]):
                     continue
 
                 for operator, op_value in value.items():
-                    print("test apply loop", column_attr, operator, op_value)
                     operator_func = self._apply_operator(
                         column_attr, operator, op_value
                     )
@@ -206,14 +205,6 @@ class BaseRepository(Generic[T]):
                 order_criteria.append(order_func(getattr(self.model, field)))
             query = query.order_by(*order_criteria)
 
-            # if sort_order is None:
-            #     sort_order = ["asc"] * len(sort_by)
-            # for field, order in zip(sort_by, sort_order):
-            #     column = getattr(self.model, field)
-            #     if order == "asc":
-            #         query = query.order_by(asc(column))
-            #     elif order == "desc":
-            #         query = query.order_by(desc(column))
         return query
 
     def _apply_pagination(
@@ -303,8 +294,6 @@ class BaseRepository(Generic[T]):
                 relationships = include
 
             # Debug log
-            print(f"Applying select for includes: {relationships}")
-            print(f"Original statement: {stmt}")
 
             for relationship in relationships:
                 # Handle nested relationships (e.g., "related_data.subdata")
@@ -332,13 +321,13 @@ class BaseRepository(Generic[T]):
                         stmt = stmt.options(
                             selectinload(rel_path[0]).selectinload(*rel_path[1:])
                         )
-                        print(f"Applied nested selectinload for: {relationship}")
+
                 else:
                     # Handle single relationship
                     rel_attr = getattr(self.model, relationship, None)
                     if rel_attr is not None:
                         stmt = stmt.options(selectinload(rel_attr))
-                        print(f"Applied selectinload for: {relationship}")
+
                     else:
                         logger.warning(
                             f"Relationship {relationship} not found on {self.model.__name__}"
@@ -406,10 +395,6 @@ class BaseRepository(Generic[T]):
                         nested_data[key] = value
                 elif key in columns:
                     model_data[key] = value
-
-            print(f"Model data: {model_data}")
-            print(f"Nested data: {nested_data}")
-            print(f"List nested data: {list_nested_data}")
 
             # Create main model instance
             db_obj = self.model(**model_data)
@@ -485,8 +470,6 @@ class BaseRepository(Generic[T]):
             if filters:
                 stmt, _ = self._apply_filter_condition(stmt, filters)
 
-                # Apply relationship loading if needed
-                # if include:
                 stmt = self._apply_select(stmt, include)
 
             result = await self.db.execute(stmt)
@@ -526,15 +509,13 @@ class BaseRepository(Generic[T]):
             # Apply relationship loading if needed
             if include:
                 stmt = self._apply_select(stmt, include)
-                # for relationship in include:
-                #     stmt = stmt.options(joinedload(getattr(self.model, relationship)))
 
             # Execute query with existing session
             result = await self.db.execute(stmt)
             obj = result.unique().scalars().first()
 
             # Only refresh if we found an object
-            print("obj", obj)
+
             return obj
 
         except Exception as e:
@@ -558,15 +539,11 @@ class BaseRepository(Generic[T]):
         model=None,
         path=None,
     ) -> Tuple[Select, List]:
-        print(f"Raw condition input: {condition} {model} {path}")
-        print(f"Condition type: {type(condition)}")
 
         # Convert to FilterCondition if needed
         if isinstance(condition, dict):
-            print("Converting dict to FilterCondition")
             try:
                 condition = FilterCondition.from_dict(condition)
-                print(f"Converted condition: {condition}")
             except Exception as e:
                 logger.error(f"Error converting condition: {str(e)}")
                 return stmt, []
@@ -586,16 +563,13 @@ class BaseRepository(Generic[T]):
                 filter_expr = self._apply_operator(column, condition.op, casted_value)
                 if filter_expr is not None:
                     current_filters.append(filter_expr)
-                    print(f"Added direct filter: {filter_expr}")
             except Exception as e:
                 logger.error(f"Error applying direct filter: {str(e)}")
 
         # Handle nested relations
         if condition.relation:
-            print(f"Processing relations: {condition.relation}")
             for rel_name, rel_condition in condition.relation.items():
                 try:
-                    print(f"Processing relation: {rel_name}")
                     rel_attr = getattr(model, rel_name)
                     related_model = rel_attr.property.mapper.class_
 
@@ -608,7 +582,6 @@ class BaseRepository(Generic[T]):
 
                     # Join with the related model
                     stmt = stmt.join(rel_attr)
-                    print(f"Joined with {rel_name}")
 
                     # Apply filters on the related model
                     nested_stmt, nested_filters = self._apply_filter_condition(
@@ -617,7 +590,6 @@ class BaseRepository(Generic[T]):
 
                     if nested_filters:
                         current_filters.extend(nested_filters)
-                        print(f"Added nested filters from {rel_name}: {nested_filters}")
 
                     stmt = nested_stmt
                 except Exception as e:
@@ -630,7 +602,6 @@ class BaseRepository(Generic[T]):
         if current_filters:
             filter_condition = and_(*current_filters)
             stmt = stmt.where(filter_condition)
-            print(f"Applied filter condition: {filter_condition}")
 
         return stmt, current_filters
 
@@ -646,20 +617,15 @@ class BaseRepository(Generic[T]):
         group_by: List[str] = None,
     ) -> List[M]:
         stmt = select(self.model)
-        print(f"Initial filter_by: {filter_by}")
 
         # Apply filters using _apply_filter_condition
-        # if filter_by:
-        #     stmt = self._apply_filters(stmt, filter_by)
+
         if filter_by:
             # stmt = self._apply_joins(stmt, filter_by)
             stmt, _ = self._apply_filter_condition(stmt, filter_by)
-        # print(f"After applying filters: {stmt}")
 
         # Apply joins
-        #
-        # stmt = self._apply_filters(stmt, filter_by)
-        # stmt = self._apply_joins(stmt, filter_by)
+
         stmt = self._apply_select(stmt, select_list)
 
         stmt = self._apply_sorting(stmt, order_by, order_type)
@@ -673,7 +639,6 @@ class BaseRepository(Generic[T]):
     async def update(self, id: int, data: Dict) -> Optional[M]:
         """Update a record by id"""
         try:
-            print("update data", data)
             # Get existing record with relationships loaded
             stmt = select(self.model).where(self.model.id == int(id))
 

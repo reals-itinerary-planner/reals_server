@@ -43,12 +43,6 @@ class FilterType(TypedDict, total=False):
 
 
 class BaseModel(DeclarativeBase):
-    # def __init__(cls, name, bases, dct):
-    #     super().__init__(name, bases, dct)
-    #     for attr_name, attr in dct.items():
-    #         if isinstance(attr, relationship):
-    #             # Use selectinload by default instead of lazy-loading
-    #             attr.lazy = "selectin"
 
     __abstract__ = True
 
@@ -107,7 +101,7 @@ class BaseModel(DeclarativeBase):
 
     def to_dict(self, depth=1, max_depth=None) -> Dict[str, Any]:
         """Convert model instance to dictionary with automatic depth detection"""
-        print(f"Depth: {depth}, Max Depth: {max_depth}")
+
         if max_depth is None:
             max_depth = self.get_max_depth(self.__class__)  # Automatically calculate
 

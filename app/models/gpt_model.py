@@ -76,23 +76,6 @@ def __init__(self, **kwargs):
         setattr(self, key, value)
 
 
-# def to_dict(self) -> dict:
-#     """Override to_dict to ensure messages are included"""
-#     result = super().to_dict()
-
-#     # Ensure messages are loaded and converted
-#     if hasattr(self, "messages"):
-#         result["messages"] = (
-#             [message.to_dict() for message in self.messages]
-#             if self.messages
-#             else []
-#         )
-#     if hasattr(self, "api_usage"):
-#         result["api_usage"] = self.api_usage.to_dict()
-
-#     return result
-
-
 class Message(BaseModel):
     __tablename__ = "messages"
     id = Column(Integer, primary_key=True)
@@ -135,7 +118,6 @@ class APIRequestLog(UUIDBase):
 
 # Example engine creation
 engine = create_engine("postgresql://postgres:postgres@localhost/reals")
-# Base.metadata.create_all(engine)
 
 
 class APIUsageFilter(TypedDict, total=False):

@@ -12,7 +12,7 @@ class ResponseMiddleware(BaseHTTPMiddleware):
         self, request: Request, call_next: RequestResponseEndpoint
     ) -> Union[Response, JSONResponse]:
         response = await call_next(request)
-        print("ResponseMiddleware is", response)
+
         # Handle streaming response
         if isinstance(response, StreamingResponse):
             # Collect all chunks into one response
@@ -24,13 +24,10 @@ class ResponseMiddleware(BaseHTTPMiddleware):
             try:
                 # Parse the content as JSON
                 json_content = json.loads(content)
-                # print("json_content is 1", json_content, content, type(content))
-                # If not already in our standard format
                 if not all(
                     key in json_content for key in ["result", "status_code", "message"]
                 ):
-                    # print("json_content is", json_content, content, type(content))
-                    # Create standardized response
+
                     standardized_response = ResponseSchema(
                         result=serialize_object(json_content),
                         status=response.status_code,

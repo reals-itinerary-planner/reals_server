@@ -10,7 +10,6 @@ from .auth_route import router as auth_router
 
 # Create user router
 user_router = create_data_router(
-    # schema=UserCreateSchema,
     model=User,  # Pass the SQLAlchemy model
     prefix="/users",
     tags=["Users"],
